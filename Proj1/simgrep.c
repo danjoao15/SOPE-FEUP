@@ -130,23 +130,25 @@ void searchDir(char* path){
             searchDir(newPath);}
             break;
 
-          /*default:
-              waitpid(pid,NULL,WNOHANG);*/
+
 
         }
       }
     }
     closedir(dp);
   }
-  //  process dir (call searchDir again lulz)
+
 }
+int main(int argc, char* argv[]){
 
-char* path = getcwd(NULL, 256); //Saves the current path.
+  char* path = getcwd(NULL, 256); //Saves the current path.
 
-processArgs(argc,argv);
-
-searchDir(path);
+  processArgs(argc,argv);
 
 
-  return 0;
+  searchDir(path);
+
+
+
+
 }
