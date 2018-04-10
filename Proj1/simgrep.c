@@ -18,7 +18,7 @@ struct Flags{
   int wMode;
   int rMode;
   char fileName[];
-  char pattern[];
+//  char pattern[];
 
 } flags;
 
@@ -64,8 +64,8 @@ void processArgs(int argc, char* argv[]){
   flags.cMode = 0;
   flags.wMode = 0;
   flags.rMode = 0;
-  flags.fileName=argv[argc];
-  flags.pattern=argv[argc-1];
+  //flags.fileName=argv[argc];
+//  flags.pattern=argv[argc-1];
 
   for(size_t i = 0; i < argc; i++){
     if (strcmp(argv[i],"-i") == 0) flags.iMode = 1;
@@ -73,7 +73,7 @@ void processArgs(int argc, char* argv[]){
     if (strcmp(argv[i],"-n") == 0) flags.nMode = 1;
     if (strcmp(argv[i],"-c") == 0) flags.cMode = 1;
     if (strcmp(argv[i],"-w") == 0) flags.wMode = 1;
-    if (strcmp(argv[i],"-r") == 0) flags.rMOde = 1;
+    if (strcmp(argv[i],"-r") == 0) flags.rMode = 1;
   }
 
 }
@@ -92,7 +92,10 @@ void searchDir(char* path){
 
   if (S_ISDIR(fileStatus.st_mode)){
 
-    if ((dp = opendir(path)) == NULL) printf("Error opendir\n");
+    if ((dp = opendir(path)) == NULL) printf("Error opendir\n"); else{
+      char* path = getcwd(NULL, 256);
+      printf("entrei %s \n", path);
+    }
 
     char newPath[256];
 
@@ -110,7 +113,7 @@ void searchDir(char* path){
 
       //Whether the read structure is a file.
       if (S_ISREG(fileStatus.st_mode)){
-        if (flags.lMode == 1 && strcmp(flags.fileName == fileEntry->d_name)==0){
+        if (flags.lMode == 1 && strcmp(flags.fileName, fileEntry->d_name)== 0){
             printf("%s\n", newPath);
         }
       }
@@ -139,16 +142,57 @@ void searchDir(char* path){
   }
 
 }
+
+int searchInFile(char *fname, char *str) {
+  FILE *fp;
+  int line_num = 1;
+  int find_result = 0;
+  char temp[512];
+
+  if((fp = fopen(fname, "r")) == NULL) {
+    return(-1);
+  }
+
+  while(fgets(temp, 512, fp) != NULL) {
+    if((strstr(temp, str)) != NULL) {
+      /*
+      if -i (ignore case)
+      em vez de strstr usar *strcasestr
+      */
+      /*
+      if so e pedir a linha
+      printf("A match found on line: %d\n", line_num);
+      */
+      /*
+      if se so pedir o file name
+      */
+      printf("%s", temp);
+      find_result++;
+    }
+    line_num++;
+  }
+
+  if(find_result == 0) {
+    //do nothing
+  }
+
+  //Close the file if still open.
+  if(fp) {
+    fclose(fp);
+  }
+    return(0);
+}
+
+
 int main(int argc, char* argv[]){
 
-  char* path = getcwd(NULL, 256); //Saves the current path.
+/*  char* path = getcwd(NULL, 256); //Saves the current path.
+  if(path != NULL){
+    processArgs(argc,argv);
+    searchDir(path);
+  } else{
+    return errno;
+  }*/
 
-  processArgs(argc,argv);
-
-
-  searchDir(path);
-
-
-
-
+  searchInFile(argv[2], argv[1]);
 }
