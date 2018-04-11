@@ -153,39 +153,81 @@ int searchInFile(char *fname, char *str) {
   int lineCount = 0;
   char temp[512];
 
+  char strWFlag[100];
+  strcpy(strWFlag, " ");
+  strcat(strWFlag, str);
+  strcat(strWFlag, " ");
+  char strWFlag2[100];
+  strcpy(strWFlag2, str);
+  strcat(strWFlag2, " ");
+/*TESTES
+  printf("flags.iMode:%d\n",flags.iMode);
+  printf("flags.lMode:%d\n",flags.lMode);
+  printf("flags.nMode:%d\n",flags.nMode);
+  printf("flags.cMode:%d\n",flags.cMode);
+  printf("flags.wMode:%d\n",flags.wMode);
+  printf("flags.rMode:%d\n",flags.rMode);
+*/
   if((fp = fopen(fname, "r")) == NULL) {
+  	printf("simgrep: %s: No such file or directory\n",fname);
     return(-1);
   }
+
   if(flags.iMode){
 	  while(fgets(temp, 512, fp) != NULL) {
 	    if((strcasestr(temp, str)) != NULL) {
-	      if(flags.cMode){
-	      	lineCount++;
-	      }else if(flags.nMode){
-	      	printf("%d:",line_num);}
-	      	printf("%s", temp);
-	 		
-	      find_result++;
-	    }
-	    line_num++;
-	  }
-	 if(flags.cMode){ printf("%d \n",lineCount);}
-	} else{
+	      
+	      if(flags.lMode){
+			     	printf("%s \n", fname);
+			      	break;
+			    } 
+			    else if(flags.cMode)
+			    {
+			     	lineCount++;
+			    }
+			    else
+			    {
+			      	if(flags.nMode){ printf("%d:",line_num);}
+			     	 printf("%s", temp);
+			    }
+			 		
+			    find_result++;
+
+		    }
+
+		 	line_num++;
+		}
+
+	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
+	
+	}
+	 else 
+	{
 		while(fgets(temp, 512, fp) != NULL) {
-	    if((strstr(temp, str)) != NULL) {
-	      if(flags.cMode){
-	      	lineCount++;
-	      }else {
-	      	if(flags.nMode){
-	      	printf("%d:",line_num);}
-	      	printf("%s", temp);
-	      }
-	 		
-	      find_result++;
-	    }
-	    line_num++;
-	  }
-	 if(flags.cMode){ printf("%d \n",lineCount);}
+		    if((strstr(temp, str)) != NULL) {
+
+			  	if(flags.lMode){
+			     	printf("%s \n", fname);
+			      	break;
+			    } 
+			    else if(flags.cMode)
+			    {
+			     	lineCount++;
+			    }
+			    else
+			    {
+			      	if(flags.nMode){ printf("%d:",line_num);}
+			     	 printf("%s", temp);
+			    }
+			 		
+			    find_result++;
+
+		    }
+
+		 	line_num++;
+		}
+
+	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
 	}
 
   if(find_result == 0) {
