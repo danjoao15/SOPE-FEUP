@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 
 
+#define _GNU_SOURCE
+
 struct Flags{
   int iMode;
   int lMode;
@@ -17,9 +19,8 @@ struct Flags{
   int cMode;
   int wMode;
   int rMode;
-  char fileName[];
-//  char pattern[];
-
+  int fileNameNr;
+  int patternNr;
 } flags;
 
 
@@ -64,20 +65,22 @@ void processArgs(int argc, char* argv[]){
   flags.cMode = 0;
   flags.wMode = 0;
   flags.rMode = 0;
+  flags.fileNameNr=2;
+  flags.patternNr=1;
   //flags.fileName=argv[argc];
-//  flags.pattern=argv[argc-1];
+  //flags.pattern=argv[argc-1];
 
   for(size_t i = 0; i < argc; i++){
-    if (strcmp(argv[i],"-i") == 0) flags.iMode = 1;
-    if (strcmp(argv[i],"-l") == 0) flags.lMode = 1;
-    if (strcmp(argv[i],"-n") == 0) flags.nMode = 1;
-    if (strcmp(argv[i],"-c") == 0) flags.cMode = 1;
-    if (strcmp(argv[i],"-w") == 0) flags.wMode = 1;
-    if (strcmp(argv[i],"-r") == 0) flags.rMode = 1;
+    if (strcmp(argv[i],"-i") == 0) {flags.iMode = 1; flags.fileNameNr++; flags.patternNr++;}
+    if (strcmp(argv[i],"-l") == 0) {flags.lMode = 1; flags.fileNameNr++; flags.patternNr++;}
+    if (strcmp(argv[i],"-n") == 0) {flags.nMode = 1; flags.fileNameNr++; flags.patternNr++;}
+    if (strcmp(argv[i],"-c") == 0) {flags.cMode = 1; flags.fileNameNr++; flags.patternNr++;}
+    if (strcmp(argv[i],"-w") == 0) {flags.wMode = 1; flags.fileNameNr++; flags.patternNr++;}
+    if (strcmp(argv[i],"-r") == 0) {flags.rMode = 1; flags.fileNameNr++; flags.patternNr++;}
   }
 
 }
-
+/*
 void searchDir(char* path){
 
   struct stat fileStatus;
@@ -142,35 +145,48 @@ void searchDir(char* path){
   }
 
 }
-
+*/
 int searchInFile(char *fname, char *str) {
   FILE *fp;
   int line_num = 1;
   int find_result = 0;
+  int lineCount = 0;
   char temp[512];
 
   if((fp = fopen(fname, "r")) == NULL) {
     return(-1);
   }
-
-  while(fgets(temp, 512, fp) != NULL) {
-    if((strstr(temp, str)) != NULL) {
-      /*
-      if -i (ignore case)
-      em vez de strstr usar *strcasestr
-      */
-      /*
-      if so e pedir a linha
-      printf("A match found on line: %d\n", line_num);
-      */
-      /*
-      if se so pedir o file name
-      */
-      printf("%s", temp);
-      find_result++;
-    }
-    line_num++;
-  }
+  if(flags.iMode){
+	  while(fgets(temp, 512, fp) != NULL) {
+	    if((strcasestr(temp, str)) != NULL) {
+	      if(flags.cMode){
+	      	lineCount++;
+	      }else if(flags.nMode){
+	      	printf("%d:",line_num);}
+	      	printf("%s", temp);
+	 		
+	      find_result++;
+	    }
+	    line_num++;
+	  }
+	 if(flags.cMode){ printf("%d \n",lineCount);}
+	} else{
+		while(fgets(temp, 512, fp) != NULL) {
+	    if((strstr(temp, str)) != NULL) {
+	      if(flags.cMode){
+	      	lineCount++;
+	      }else {
+	      	if(flags.nMode){
+	      	printf("%d:",line_num);}
+	      	printf("%s", temp);
+	      }
+	 		
+	      find_result++;
+	    }
+	    line_num++;
+	  }
+	 if(flags.cMode){ printf("%d \n",lineCount);}
+	}
 
   if(find_result == 0) {
     //do nothing
@@ -193,6 +209,6 @@ int main(int argc, char* argv[]){
   } else{
     return errno;
   }*/
-
-  searchInFile(argv[2], argv[1]);
+	processArgs(argc,argv);
+  	searchInFile(argv[flags.fileNameNr], argv[flags.patternNr]);
 }
