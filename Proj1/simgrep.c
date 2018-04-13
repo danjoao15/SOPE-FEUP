@@ -22,6 +22,7 @@ struct Flags{
   int rMode;
   int fileNameNr;
   int patternNr;
+  char fileName[];
 } flags;
 
 
@@ -79,6 +80,7 @@ void processArgs(int argc, char* argv[]){
     if (strcmp(argv[i],"-w") == 0) {flags.wMode = 1; flags.fileNameNr++; flags.patternNr++;}
     if (strcmp(argv[i],"-r") == 0) {flags.rMode = 1; flags.fileNameNr++; flags.patternNr++;}
   }
+  strcpy(flags.fileName, argv[flags.fileNameNr]);
 
 }
 /*
@@ -189,36 +191,58 @@ int searchInFile(char *fname, char *str) {
   if(flags.wMode){
     char *token;
 	  while(fgets(temp, 512, fp) != NULL) {
-		char auxTemp[512];
-		strcpy(auxTemp,temp);
-      		token = strtok(temp, " ,.-\n");
-     		 while(token!=NULL){
-			if(!flags.iMode){
-	  	    		if(strcmp(token,str) == 0) {
-		  			printf("%s",auxTemp);
-	  			        find_result++;
+      char auxTemp[512];
+      strcpy(auxTemp,temp);
+      token = strtok(temp, " ,.-\n");
+      while(token!=NULL){
+        if(flags.iMode){
+          if(strcmp(token,str) == 0) {
+            if(flags.lMode){
+              printf("%s \n", fname);
+              break;
+            }
+            else if(flags.cMode)
+            {
+              lineCount++;
+            }
+            else
+            {
+              if(flags.nMode){ printf("%d:",line_num);}
+              printf("%s", auxTemp);
+            }
+            find_result++;
 
-	  		   	 }
-			 }
-			else
-			{	if(strcasecmp(token,str) == 0) {
-		  			printf("%s",auxTemp);
-	  			        find_result++;
+          }
+        }
+        else
+        {	if(strcasecmp(token,str) == 0) {
+            if(flags.lMode){
+              printf("%s \n", fname);
+              break;
+            }
+            else if(flags.cMode)
+            {
+              lineCount++;
+            }
+            else
+            {
+              if(flags.nMode){ printf("%d:",line_num);}
+              printf("%s", auxTemp);
+            }
+            find_result++;
 
-	  		   	 }
+        }
 
-			}
-         	 token = strtok(NULL, " ,.-\n");
-     		 }
-		line_num++;
-	}
+      }
+      token = strtok(NULL, " ,.-\n");
+    }
+    line_num++;
+  }
 
 
 }
 
 
-
-/*
   if(flags.iMode){
 	  while(fgets(temp, 512, fp) != NULL) {
 	    if((strcasestr(temp, str)) != NULL) {
@@ -281,7 +305,7 @@ int searchInFile(char *fname, char *str) {
   	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
    }
 	}
-*/
+
   if(find_result == 0) {
     //do nothing
   }
