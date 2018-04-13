@@ -191,15 +191,24 @@ int searchInFile(char *fname, char *str) {
 	  while(fgets(temp, 512, fp) != NULL) {
 		char auxTemp[512];
 		strcpy(auxTemp,temp);
-      		token = strtok(temp, " ,.-");
+      		token = strtok(temp, " ,.-\n");
      		 while(token!=NULL){
-        		//printf("token: %s\n",token);
-  	    		if(strcmp(token,str) == 0) {
-          			printf("%s",auxTemp);
-  			        find_result++;
+			if(!flags.iMode){
+	  	    		if(strcmp(token,str) == 0) {
+		  			printf("%s",auxTemp);
+	  			        find_result++;
 
-  		   	 }
-         	 token = strtok(NULL, " ,.-");
+	  		   	 }
+			 }
+			else
+			{	if(strcasecmp(token,str) == 0) {
+		  			printf("%s",auxTemp);
+	  			        find_result++;
+
+	  		   	 }
+
+			}
+         	 token = strtok(NULL, " ,.-\n");
      		 }
 		line_num++;
 	}
