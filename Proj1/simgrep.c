@@ -8,6 +8,7 @@
 #include <wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <regex.h>
 
 
 #define _GNU_SOURCE
@@ -152,14 +153,26 @@ int searchInFile(char *fname, char *str) {
   int find_result = 0;
   int lineCount = 0;
   char temp[512];
+/*
+  regex_t regex;
+  int ptrRegex;
 
-  char strWFlag[100];
-  strcpy(strWFlag, " ");
-  strcat(strWFlag, str);
-  strcat(strWFlag, " ");
-  char strWFlag2[100];
-  strcpy(strWFlag2, str);
-  strcat(strWFlag2, " ");
+  if(flags.wMode){
+
+    char wModeString[50];
+    strcpy(wModeString,"(\W)"); //(?:^|\W)
+    strcat(wModeString,str);
+    strcat(wModeString,"(\W)"); //(?:$|\W)
+
+    //printf("%s\n", wModeString);
+    ptrRegex = regcomp(&regex, wModeString, 0);
+    if (ptrRegex) {
+      printf("Could not compile regex\n");
+      exit(1);
+    }
+  }
+*/
+
 /*TESTES
   printf("flags.iMode:%d\n",flags.iMode);
   printf("flags.lMode:%d\n",flags.lMode);
@@ -173,24 +186,48 @@ int searchInFile(char *fname, char *str) {
     return(-1);
   }
 
+  if(flags.wMode){
+    const char s[2] = " ";
+    char *token;
+	  while(fgets(temp, 512, fp) != NULL) {
+      token = strtok(temp, " ");
+      while(token!=NULL){
+        printf("temp: %s\n str: %s\n",temp, str);
+  	    if(strcmp(token,str) != 0) {
+          	printf("Token: %s\n", temp);
+  			    find_result++;
+
+  		    }
+          token = strtok(NULL, " ");
+      }
+		 	line_num++;
+		}
+
+	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
+
+	}
+
+
+
+/*
   if(flags.iMode){
 	  while(fgets(temp, 512, fp) != NULL) {
 	    if((strcasestr(temp, str)) != NULL) {
-	      
+
 	      if(flags.lMode){
 			     	printf("%s \n", fname);
-			      	break;
-			    } 
+			      break;
+			    }
 			    else if(flags.cMode)
 			    {
 			     	lineCount++;
 			    }
 			    else
 			    {
-			      	if(flags.nMode){ printf("%d:",line_num);}
-			     	 printf("%s", temp);
+			      if(flags.nMode){ printf("%d:",line_num);}
+			     	printf("%s", temp);
 			    }
-			 		
+
 			    find_result++;
 
 		    }
@@ -199,37 +236,43 @@ int searchInFile(char *fname, char *str) {
 		}
 
 	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
-	
+
 	}
-	 else 
+	 else
 	{
-		while(fgets(temp, 512, fp) != NULL) {
-		    if((strstr(temp, str)) != NULL) {
+    if(flags.wMode){
+      //REGEX
+    }
+    else
+    {
+  		while(fgets(temp, 512, fp) != NULL) {
+  		    if((strstr(temp, str)) != NULL) {
 
-			  	if(flags.lMode){
-			     	printf("%s \n", fname);
-			      	break;
-			    } 
-			    else if(flags.cMode)
-			    {
-			     	lineCount++;
-			    }
-			    else
-			    {
-			      	if(flags.nMode){ printf("%d:",line_num);}
-			     	 printf("%s", temp);
-			    }
-			 		
-			    find_result++;
+  			  	if(flags.lMode){
+  			     	printf("%s \n", fname);
+  			      break;
+  			    }
+  			    else if(flags.cMode)
+  			    {
+  			     	lineCount++;
+  			    }
+  			    else
+  			    {
+  			      if(flags.nMode){ printf("%d:",line_num);}
+  			     	printf("%s", temp);
+  			    }
 
-		    }
+  			    find_result++;
 
-		 	line_num++;
-		}
+  		    }
 
-	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
+  		 	line_num++;
+  		}
+
+  	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
+   }
 	}
-
+*/
   if(find_result == 0) {
     //do nothing
   }
@@ -252,5 +295,5 @@ int main(int argc, char* argv[]){
     return errno;
   }*/
 	processArgs(argc,argv);
-  	searchInFile(argv[flags.fileNameNr], argv[flags.patternNr]);
+  searchInFile(argv[flags.fileNameNr], argv[flags.patternNr]);
 }
