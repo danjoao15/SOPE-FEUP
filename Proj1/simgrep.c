@@ -195,7 +195,7 @@ int searchInFile(char *fname, char *str) {
       strcpy(auxTemp,temp);
       token = strtok(temp, " ,.-\n");
       while(token!=NULL){
-        if(flags.iMode){
+        if(!flags.iMode){
           if(strcmp(token,str) == 0) {
             if(flags.lMode){
               printf("%s \n", fname);
@@ -239,6 +239,7 @@ int searchInFile(char *fname, char *str) {
     line_num++;
   }
 
+  if(flags.cMode ){ printf("%d \n",lineCount);}
 
 }
 
@@ -268,7 +269,7 @@ int searchInFile(char *fname, char *str) {
 		 	line_num++;
 		}
 
-	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
+	 if(flags.cMode ){ printf("%d \n",lineCount);}
 
 	}
 	 else
@@ -302,7 +303,7 @@ int searchInFile(char *fname, char *str) {
   		 	line_num++;
   		}
 
-  	 if(flags.cMode && !flags.cMode){ printf("%d \n",lineCount);}
+  	 if(flags.cMode){ printf("%d \n",lineCount);}
    }
 	}
 
