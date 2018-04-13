@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <signal.h>
@@ -83,72 +84,7 @@ void processArgs(int argc, char* argv[]){
   strcpy(flags.fileName, argv[flags.fileNameNr]);
 
 }
-/*
-void searchDir(char* path){
 
-  struct stat fileStatus;
-  struct dirent *fileEntry;
-  DIR* dp;
-  pid_t pid;
-
-  subscribe_SIGINT();
-  sleep(4);
-
-  if (stat(path,&fileStatus) != 0) printf("stat error\n");
-
-  if (S_ISDIR(fileStatus.st_mode)){
-
-    if ((dp = opendir(path)) == NULL) printf("Error opendir\n"); else{
-      char* path = getcwd(NULL, 256);
-      printf("entrei %s \n", path);
-    }
-
-    char newPath[256];
-
-    while ((fileEntry = readdir(dp)) != NULL){
-
-      //Ignore the current directory and previous directory folders.
-      if (strcmp(fileEntry->d_name, ".") == 0 || strcmp(fileEntry->d_name, "..") == 0){
-        continue;
-      }
-      //Update the current path.
-      strcpy(newPath, path);
-      strcat(newPath, "/");
-      strcat(newPath, fileEntry->d_name);
-      stat(newPath, &fileStatus);
-
-      //Whether the read structure is a file.
-      if (S_ISREG(fileStatus.st_mode)){
-        if (flags.lMode == 1 && strcmp(flags.fileName, fileEntry->d_name)== 0){
-            printf("%s\n", newPath);
-        }
-      }
-
-      //Whether the read structure is a directory.
-      if (S_ISDIR(fileStatus.st_mode)){
-        if (flags.lMode == 1 ){
-            printf("%s\n", newPath);
-        }
-        switch (pid = fork()){
-          case -1:
-            perror("Error fork()...\n");
-            break;
-
-          case 0: //child process
-            if(flags.rMode==1){
-            searchDir(newPath);}
-            break;
-
-
-
-        }
-      }
-    }
-    closedir(dp);
-  }
-
-}
-*/
 int searchInFile(char *fname, char *str) {
   FILE *fp;
   int line_num = 1;
@@ -318,16 +254,82 @@ int searchInFile(char *fname, char *str) {
     return(0);
 }
 
+void searchDir(char* path, char* str){
+
+  struct stat fileStatus;
+  struct dirent *fileEntry;
+  DIR* dp;
+  pid_t pid;
+  if (stat(path,&fileStatus) != 0) printf("stat error\n");
+  if (S_ISDIR(fileStatus.st_mode)){
+
+    if ((dp = opendir(path)) == NULL) printf("Error opendir\n"); else{
+      char* path = getcwd(NULL, 256);
+      printf("entrei %s \n", path);
+    }
+
+    char newPath[256];
+
+    while ((fileEntry = readdir(dp)) != NULL){
+
+      //Ignore the current directory and previous directory folders.
+      if (strcmp(fileEntry->d_name, ".") == 0 || strcmp(fileEntry->d_name, "..") == 0){
+  
+        continue;
+      }
+
+      //Update the current path.
+      strcpy(newPath, path);
+      strcat(newPath, "/");
+      strcat(newPath, fileEntry->d_name);
+      stat(newPath, &fileStatus);
+  
+
+      //Whether the read structure is a file.
+      if (!S_ISDIR(fileStatus.st_mode)){
+  
+        searchInFile(fileEntry->d_name, str);
+   
+      }
+
+      //Whether the read structure is a directory.
+      if (S_ISDIR(fileStatus.st_mode)){
+      
+        switch (pid = fork()){
+          case -1:
+      
+            perror("Error fork()...\n");
+            break;
+
+          case 0: //child process
+          
+            if(flags.rMode==1){
+           
+            searchDir(newPath,str);}
+            break;
+
+
+
+        }
+      }
+    }
+    closedir(dp);
+  }
+
+}
+
+
+
 
 int main(int argc, char* argv[]){
 
-/*  char* path = getcwd(NULL, 256); //Saves the current path.
-  if(path != NULL){
-    processArgs(argc,argv);
-    searchDir(path);
-  } else{
-    return errno;
-  }*/
+/
 	processArgs(argc,argv);
-  searchInFile(argv[flags.fileNameNr], argv[flags.patternNr]);
+	if(flags.rMode){
+		searchDir(argv[flags.fileNameNr], argv[flags.patternNr]);
+	}else{
+		searchInFile(argv[flags.fileNameNr], argv[flags.patternNr]);
+	}
+  
+  return 0;
 }
