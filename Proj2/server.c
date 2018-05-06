@@ -11,7 +11,7 @@
 
 //FIFO path and descriptors
 char* REQUESTS_FIFO = "/tmp/requests";
-int REQUEST_FD;
+int REQUEST_FD, DUMMY_FD;
 
 struct event_info {
   int num_room_seats;                    // number of available seats
@@ -19,6 +19,7 @@ struct event_info {
   int open_time;       // time ticket offices are available
 };
 
+/*
 int isSeatFree(Seat *seats, int seatNum){
   int i;
   for(i=0; i<event.num_room_seats; i++){
@@ -37,7 +38,9 @@ void bookSeat(Seat *seats, int seatNum, int clientId){
 void freeSeat(Seat *seats, int seatNum){
 
 }
+*/
 
+/*
 void* openTicketOffice(void *tNum){
   //escrever no log que abriu bilheteira
 
@@ -68,10 +71,9 @@ void* openTicketOffice(void *tNum){
       }
    }
 }
+*/
 
 int seats[];
-
-
 //Mutex initializer
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -92,32 +94,46 @@ int main(int argc, char* argv[]){
   pthread_t tid[event.num_ticket_offices];
   seats[event.num_room_seats];
 
+  if (mkfifo(REQUESTS_FIFO,0660)<0)
+        if (errno==EEXIST) printf("FIFO '/tmp/requests' already exists\n");
+        else{
+          printf("Can't create requests FIFO. CLOSING SERVER!!!\n");
+          exit(-1);
+        } 
+  else printf("FIFO '/tmp/requests' sucessfully created\n");
 
-
-if (mkfifo(REQUESTS_FIFO, S_IRUSR | S_IWUSR) != 0 && errno != EEXIST){
-    perror("Error creating REQUESTS fifo");
-    pthread_exit(NULL);
-  }
-
-  while ((REQUEST_FD = open(REQUESTS_FIFO, O_RDONLY)) == -1){
+  if ((REQUEST_FD=open("/tmp/requests",O_RDONLY)) ==-1){
     if (errno == ENOENT || errno == ENXIO){
-      printf("Retrying...\n");
+      printf("Err opening FiFo to read request.Retrying...\n");
       sleep(1);
     } else {
       perror("Error opening REQUESTS fifo");
       exit(-1);
     }
   }
+  printf("FIFO '/tmp/requests' openned in READONLY mode\n");
 
+  if ((DUMMY_FD=open("/tmp/requests",O_WRONLY)) !=-1){
+    printf("FIFO '/tmp/requests' openned in WRITEONLY mode to cancel active waiting\n");
+    exit(-1);
+  }
+
+/*
 for (int i=0; i<event.num_ticket_offices; i++){
   pthread_create(&tid[i],NULL, makeReservation, NULL);
  // pthread_join(tid,NULL);
 }
-
+*/
   
+  close(REQUEST_FD);
+  close(DUMMY_FD);
 
+  if (unlink("/tmp/requests")<0)
+    printf("Error when destroying FIFO '/tmp/requests'\n");
+  else
+    printf("FIFO '/tmp/requests' has been destroyed\n");
 
-  pthread_exit(NULL);
+  exit(0);
 }
 
    
